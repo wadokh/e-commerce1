@@ -45,7 +45,6 @@ export class OrderController {
             ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
-
     static async createOrder(ctx: Context) {
         try {
             console.log("Order POST request");

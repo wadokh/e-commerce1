@@ -25,7 +25,6 @@ export class CustomerController {
             const customer = await customerRepository.findOne({
                 where: { id },
             });
-
             if (!customer) {
                 ctx.throw(StatusCodes.NOT_FOUND, "Customer not found");
             }

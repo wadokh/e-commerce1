@@ -94,7 +94,6 @@ export class OrderItemController {
                 }
                 orderItem.price = price;
             }
-
             await orderItemRepository.save(orderItem);
             ctx.body = orderItem;
         } catch (error) {

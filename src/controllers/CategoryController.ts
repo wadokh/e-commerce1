@@ -100,7 +100,6 @@ export class CategoryController {
             if (isNaN(id)) {
                 ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
-
             console.log(`${id} category DELETE request`);
             const categoryRepository = AppDataSource.getRepository(Category);
             const category = await categoryRepository.findOne({ where: { id } });
@@ -108,7 +107,6 @@ export class CategoryController {
             if (!category) {
                 ctx.throw(StatusCodes.NOT_FOUND, "Category not found");
             }
-
             await categoryRepository.remove(category);
             ctx.body = `Category with ID ${id} has been deleted`;
         } catch (error) {

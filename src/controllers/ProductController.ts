@@ -139,11 +139,9 @@ export class ProductController {
             if (!product) {
                 ctx.throw(StatusCodes.NOT_FOUND, `Product with ID ${productId} not found`);
             }
-
             if (product.orderItems && product.orderItems.length > 0) {
                 ctx.throw(StatusCodes.BAD_REQUEST, "Cannot delete the product as it is associated with existing order items.");
             }
-
             await productRepository.remove(product);
 
             ctx.body = { message: `Product with ID ${productId} has been deleted successfully.` };
