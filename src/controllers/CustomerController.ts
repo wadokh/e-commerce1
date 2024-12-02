@@ -14,14 +14,12 @@ export class CustomerController {
             ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
-
     static async getCustomerById(ctx: Context) {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
                 ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
-
             console.log(`${id} customer GET request`);
             const customerRepository = AppDataSource.getRepository(Customer);
             const customer = await customerRepository.findOne({
@@ -43,11 +41,9 @@ export class CustomerController {
         try {
             console.log("Customer POST request");
             const body: any = await ctx.request.body;
-
             if (!body.email) {
                 ctx.throw(StatusCodes.BAD_REQUEST, "Email is required.");
             }
-
             const customerRepository = AppDataSource.getRepository(Customer);
             const existingCustomer = await customerRepository.findOne({
                 where: { email: body.email },
