@@ -2,6 +2,7 @@ import { Context } from "koa";
 import { AppDataSource } from "../data-source";
 import { OrderItem } from "../entity/OrderItem";
 import { Product } from "../entity/Product";
+import {StatusCodes} from "../utils/StatusCodes";
 
 export class OrderItemController {
     static async getAllOrderItems(ctx: Context) {
@@ -11,7 +12,7 @@ export class OrderItemController {
             ctx.body = await orderItemRepository.find({ relations: ["product", "order"] });
         } catch (error) {
             console.error("Error fetching order items:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -19,7 +20,7 @@ export class OrderItemController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} OrderItem GET request`);
@@ -30,13 +31,13 @@ export class OrderItemController {
             });
 
             if (!orderItem) {
-                ctx.throw(404, "OrderItem not found.");
+                ctx.throw(StatusCodes.NOT_FOUND, "OrderItem not found.");
             }
 
             ctx.body = orderItem;
         } catch (error) {
             console.error("Error fetching OrderItem by ID:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -44,7 +45,7 @@ export class OrderItemController {
         try {
             const orderItemId = parseInt(ctx.params.id);
             if (isNaN(orderItemId)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${orderItemId} OrderItem PUT request`);
@@ -60,20 +61,20 @@ export class OrderItemController {
             });
 
             if (!orderItem) {
-                ctx.throw(404, `OrderItem with ID ${orderItemId} not found`);
+                ctx.throw(StatusCodes.NOT_FOUND, `OrderItem with ID ${orderItemId} not found`);
             }
 
             if (productId) {
                 const product = await productRepository.findOne({ where: { id: productId } });
 
                 if (!product) {
-                    ctx.throw(404, `Product with ID ${productId} not found`);
+                    ctx.throw(StatusCodes.NOT_FOUND, `Product with ID ${productId} not found`);
                 }
 
                 // Adjust stock
                 product.stock += orderItem.quantity; // Revert old quantity
                 if (product.stock - quantity < 0) {
-                    ctx.throw(400, `Not enough stock`);
+                    ctx.throw(StatusCodes.BAD_REQUEST, `Not enough stock`);
                 }
                 product.stock -= quantity;
 
@@ -83,14 +84,14 @@ export class OrderItemController {
 
             if (quantity) {
                 if (quantity <= 0) {
-                    ctx.throw(400, "Quantity must be greater than zero.");
+                    ctx.throw(StatusCodes.BAD_REQUEST, "Quantity must be greater than zero.");
                 }
                 orderItem.quantity = quantity;
             }
 
             if (price) {
                 if (price <= 0) {
-                    ctx.throw(400, "Price must be greater than zero.");
+                    ctx.throw(StatusCodes.BAD_REQUEST, "Price must be greater than zero.");
                 }
                 orderItem.price = price;
             }
@@ -99,7 +100,7 @@ export class OrderItemController {
             ctx.body = orderItem;
         } catch (error) {
             console.error("Error updating OrderItem:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 }

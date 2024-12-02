@@ -1,6 +1,7 @@
 import { Context } from "koa";
 import { AppDataSource } from "../data-source";
 import { Customer } from "../entity/Customer";
+import { StatusCodes} from "../utils/StatusCodes";
 
 export class CustomerController {
     static async getAllCustomers(ctx: Context) {
@@ -10,7 +11,7 @@ export class CustomerController {
             ctx.body = await customerRepository.find();
         } catch (error) {
             console.error("Error fetching customers:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -18,7 +19,7 @@ export class CustomerController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} customer GET request`);
@@ -28,13 +29,13 @@ export class CustomerController {
             });
 
             if (!customer) {
-                ctx.throw(404, "Customer not found");
+                ctx.throw(StatusCodes.NOT_FOUND, "Customer not found");
             }
 
             ctx.body = customer;
         } catch (error) {
             console.error("Error fetching customer by ID:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -44,7 +45,7 @@ export class CustomerController {
             const body: any = await ctx.request.body;
 
             if (!body.email) {
-                ctx.throw(400, "Email is required.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Email is required.");
             }
 
             const customerRepository = AppDataSource.getRepository(Customer);
@@ -53,7 +54,7 @@ export class CustomerController {
             });
 
             if (existingCustomer) {
-                ctx.throw(422, "Email must be unique.");
+                ctx.throw(StatusCodes.UNPROCESSABLE_ENTITY, "Email must be unique.");
             }
 
             const customer = customerRepository.create({
@@ -67,7 +68,7 @@ export class CustomerController {
             ctx.body = customer;
         } catch (error) {
             console.error("Error creating customer:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -75,14 +76,14 @@ export class CustomerController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} customer PUT request`);
             const body: any = await ctx.request.body;
 
             if (!body.email) {
-                ctx.throw(400, "Email is required.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Email is required.");
             }
 
             const customerRepository = AppDataSource.getRepository(Customer);
@@ -91,7 +92,7 @@ export class CustomerController {
             });
 
             if (!existingCustomer) {
-                ctx.throw(404, "Customer not found.");
+                ctx.throw(StatusCodes.NOT_FOUND, "Customer not found.");
             }
 
             const emailConflict = await customerRepository.findOne({
@@ -99,7 +100,7 @@ export class CustomerController {
             });
 
             if (emailConflict && emailConflict.id !== id) {
-                ctx.throw(422, "Email must be unique.");
+                ctx.throw(StatusCodes.UNPROCESSABLE_ENTITY, "Email must be unique.");
             }
 
             existingCustomer.firstName = body.firstName;
@@ -111,7 +112,7 @@ export class CustomerController {
             ctx.body = existingCustomer;
         } catch (error) {
             console.error("Error updating customer:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -119,7 +120,7 @@ export class CustomerController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} customer DELETE request`);
@@ -127,14 +128,14 @@ export class CustomerController {
             const customer = await customerRepository.findOne({ where: { id } });
 
             if (!customer) {
-                ctx.throw(404, "Customer not found.");
+                ctx.throw(StatusCodes.NOT_FOUND, "Customer not found.");
             }
 
             await customerRepository.remove(customer);
             ctx.body = `Customer with ID ${id} has been deleted.`;
         } catch (error) {
             console.error("Error deleting customer:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 }

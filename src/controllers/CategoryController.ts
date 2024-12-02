@@ -1,6 +1,7 @@
 import { Context } from "koa";
 import { AppDataSource } from "../data-source";
 import { Category } from "../entity/Category";
+import { StatusCodes} from "../utils/StatusCodes";
 
 export class CategoryController {
     static async getAllCategories(ctx: Context) {
@@ -10,7 +11,7 @@ export class CategoryController {
             ctx.body = await categoryRepository.find();
         } catch (error) {
             console.error("Error fetching categories:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -18,7 +19,7 @@ export class CategoryController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} category GET request`);
@@ -28,13 +29,13 @@ export class CategoryController {
             });
 
             if (!category) {
-                ctx.throw(404, "Category not found");
+                ctx.throw(StatusCodes.NOT_FOUND, "Category not found");
             }
 
             ctx.body = category;
         } catch (error) {
             console.error("Error fetching category by ID:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -44,7 +45,7 @@ export class CategoryController {
             const body: any = await ctx.request.body;
 
             if (!body.name) {
-                ctx.throw(400, "Category name is required.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Category name is required.");
             }
 
             const categoryRepository = AppDataSource.getRepository(Category);
@@ -57,7 +58,7 @@ export class CategoryController {
             ctx.body = category;
         } catch (error) {
             console.error("Error creating category:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -65,7 +66,7 @@ export class CategoryController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} category PUT request`);
@@ -75,11 +76,11 @@ export class CategoryController {
             const category = await categoryRepository.findOne({ where: { id } });
 
             if (!category) {
-                ctx.throw(404, "Category not found");
+                ctx.throw(StatusCodes.NOT_FOUND, "Category not found");
             }
 
             if (!body.name) {
-                ctx.throw(400, "Category name is required.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Category name is required.");
             }
 
             category.name = body.name;
@@ -89,7 +90,7 @@ export class CategoryController {
             ctx.body = category;
         } catch (error) {
             console.error("Error updating category:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -97,7 +98,7 @@ export class CategoryController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} category DELETE request`);
@@ -105,14 +106,14 @@ export class CategoryController {
             const category = await categoryRepository.findOne({ where: { id } });
 
             if (!category) {
-                ctx.throw(404, "Category not found");
+                ctx.throw(StatusCodes.NOT_FOUND, "Category not found");
             }
 
             await categoryRepository.remove(category);
             ctx.body = `Category with ID ${id} has been deleted`;
         } catch (error) {
             console.error("Error deleting category:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 }

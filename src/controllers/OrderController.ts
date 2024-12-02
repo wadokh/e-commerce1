@@ -5,6 +5,7 @@ import {OrderItem} from "../entity/OrderItem";
 import {Product} from "../entity/Product";
 import {Customer} from "../entity/Customer";
 import {OrderStatus} from "../utils/OrderStatus";
+import { StatusCodes} from "../utils/StatusCodes";
 
 export class OrderController {
     static async getAllOrders(ctx: Context) {
@@ -16,7 +17,7 @@ export class OrderController {
             });
         } catch (error) {
             console.error("Error fetching orders:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -24,7 +25,7 @@ export class OrderController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} order GET request`);
@@ -35,13 +36,13 @@ export class OrderController {
             });
 
             if (!order) {
-                ctx.throw(404, "Order not found");
+                ctx.throw(StatusCodes.NOT_FOUND, "Order not found");
             }
 
             ctx.body = order;
         } catch (error) {
             console.error("Error fetching order by ID:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -52,14 +53,14 @@ export class OrderController {
             const { customerId, orderItems } = body;
 
             if (!customerId || !orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
-                ctx.throw(400, "Customer ID and order items are required.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Customer ID and order items are required.");
             }
 
             const customerRepository = AppDataSource.getRepository(Customer);
             const customer = await customerRepository.findOne({ where: { id: customerId } });
 
             if (!customer) {
-                ctx.throw(404, "Customer not found.");
+                ctx.throw(StatusCodes.NOT_FOUND, "Customer not found.");
             }
 
             const productRepository = AppDataSource.getRepository(Product);
@@ -78,11 +79,11 @@ export class OrderController {
             for (const item of orderItems) {
                 const product = await productRepository.findOne({ where: { id: item.productId } });
                 if (!product) {
-                    ctx.throw(404, `Product with ID ${item.productId} not found.`);
+                    ctx.throw(StatusCodes.NOT_FOUND, `Product with ID ${item.productId} not found.`);
                 }
 
                 if (product.stock < item.quantity) {
-                    ctx.throw(400, `Insufficient stock for product ID ${item.productId}.`);
+                    ctx.throw(StatusCodes.BAD_REQUEST, `Insufficient stock for product ID ${item.productId}.`);
                 }
 
                 const orderItem = orderItemRepository.create({
@@ -104,7 +105,7 @@ export class OrderController {
             ctx.body = order;
         } catch (error) {
             console.error("Error creating order:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -112,7 +113,7 @@ export class OrderController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} order PUT request`);
@@ -120,14 +121,14 @@ export class OrderController {
             const { status } = body;
 
             if (!status) {
-                ctx.throw(400, "Order status is required.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Order status is required.");
             }
 
             const orderRepository = AppDataSource.getRepository(Order);
             const order = await orderRepository.findOne({ where: { id } });
 
             if (!order) {
-                ctx.throw(404, "Order not found.");
+                ctx.throw(StatusCodes.NOT_FOUND, "Order not found.");
             }
 
             order.status = status;
@@ -136,7 +137,7 @@ export class OrderController {
             ctx.body = order;
         } catch (error) {
             console.error("Error updating order:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -144,7 +145,7 @@ export class OrderController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} order DELETE request`);
@@ -152,14 +153,14 @@ export class OrderController {
             const order = await orderRepository.findOne({ where: { id } });
 
             if (!order) {
-                ctx.throw(404, "Order not found.");
+                ctx.throw(StatusCodes.NOT_FOUND, "Order not found.");
             }
 
             await orderRepository.remove(order);
             ctx.body = `Order with ID ${id} has been deleted.`;
         } catch (error) {
             console.error("Error deleting order:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 }

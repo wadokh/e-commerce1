@@ -2,6 +2,7 @@ import { Context } from "koa";
 import { AppDataSource } from "../data-source";
 import { Product } from "../entity/Product";
 import { Category } from "../entity/Category";
+import { StatusCodes} from "../utils/StatusCodes";
 
 export class ProductController {
     static async getAllProducts(ctx: Context) {
@@ -11,7 +12,7 @@ export class ProductController {
             ctx.body = await productRepository.find({ relations: ["category"] });
         } catch (error) {
             console.error("Error fetching products:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -19,7 +20,7 @@ export class ProductController {
         try {
             const id = parseInt(ctx.params.id);
             if (isNaN(id)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             console.log(`${id} Product GET request`);
@@ -30,13 +31,13 @@ export class ProductController {
             });
 
             if (!product) {
-                ctx.throw(404, "Product not found.");
+                ctx.throw(StatusCodes.NOT_FOUND, "Product not found.");
             }
 
             ctx.body = product;
         } catch (error) {
             console.error("Error fetching product by ID:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -47,14 +48,14 @@ export class ProductController {
             const { name, price, description, stock, categoryId } = body;
 
             if (!name || !price || !description || !stock || !categoryId) {
-                ctx.throw(400, "Missing required fields: name, price, description, stock, or categoryId");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Missing required fields: name, price, description, stock, or categoryId");
             }
 
             const categoryRepository = AppDataSource.getRepository(Category);
             const category = await categoryRepository.findOne({ where: { id: parseInt(categoryId) } });
 
             if (!category) {
-                ctx.throw(404, `Category with ID ${categoryId} not found`);
+                ctx.throw(StatusCodes.NOT_FOUND, `Category with ID ${categoryId} not found`);
             }
 
             const productRepository = AppDataSource.getRepository(Product);
@@ -71,7 +72,7 @@ export class ProductController {
             ctx.body = product;
         } catch (error) {
             console.error("Error creating product:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -80,7 +81,7 @@ export class ProductController {
             console.log("Product PUT request");
             const productId = parseInt(ctx.params.id);
             if (isNaN(productId)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             const body: any = ctx.request.body;
@@ -93,7 +94,7 @@ export class ProductController {
             });
 
             if (!product) {
-                ctx.throw(404, `Product with ID ${productId} not found`);
+                ctx.throw(StatusCodes.NOT_FOUND, `Product with ID ${productId} not found`);
             }
 
             if (name) product.name = name;
@@ -106,7 +107,7 @@ export class ProductController {
                 const category = await categoryRepository.findOne({ where: { id: parseInt(categoryId) } });
 
                 if (!category) {
-                    ctx.throw(404, `Category with ID ${categoryId} not found`);
+                    ctx.throw(StatusCodes.NOT_FOUND, `Category with ID ${categoryId} not found`);
                 }
 
                 product.category = category;
@@ -117,7 +118,7 @@ export class ProductController {
             ctx.body = product;
         } catch (error) {
             console.error("Error updating product:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 
@@ -126,7 +127,7 @@ export class ProductController {
             console.log("Product DELETE request");
             const productId = parseInt(ctx.params.id);
             if (isNaN(productId)) {
-                ctx.throw(400, "Invalid ID format. ID must be a number.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Invalid ID format. ID must be a number.");
             }
 
             const productRepository = AppDataSource.getRepository(Product);
@@ -136,11 +137,11 @@ export class ProductController {
             });
 
             if (!product) {
-                ctx.throw(404, `Product with ID ${productId} not found`);
+                ctx.throw(StatusCodes.NOT_FOUND, `Product with ID ${productId} not found`);
             }
 
             if (product.orderItems && product.orderItems.length > 0) {
-                ctx.throw(400, "Cannot delete the product as it is associated with existing order items.");
+                ctx.throw(StatusCodes.BAD_REQUEST, "Cannot delete the product as it is associated with existing order items.");
             }
 
             await productRepository.remove(product);
@@ -148,7 +149,7 @@ export class ProductController {
             ctx.body = { message: `Product with ID ${productId} has been deleted successfully.` };
         } catch (error) {
             console.error("Error deleting product:", error);
-            ctx.throw(500, "Internal server error");
+            ctx.throw(StatusCodes.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 }
