@@ -71,7 +71,6 @@ export class OrderItemController {
                     ctx.throw(StatusCodes.NOT_FOUND, `Product with ID ${productId} not found`);
                 }
 
-                // Adjust stock
                 product.stock += orderItem.quantity; // Revert old quantity
                 if (product.stock - quantity < 0) {
                     ctx.throw(StatusCodes.BAD_REQUEST, `Not enough stock`);
