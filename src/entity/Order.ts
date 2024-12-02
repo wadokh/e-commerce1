@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn } from "typeorm"
 import { Customer } from "./Customer"
 import { OrderItem } from "./OrderItem"
+import {OrderStatus} from "../utils/OrderStatus";
 
 @Entity()
 export class Order {
@@ -12,10 +13,10 @@ export class Order {
 
     @Column({
         type: "enum",
-        enum: ["pending", "processing", "shipped", "delivered"],
-        default: "pending"
+        enum: OrderStatus,
+        default: OrderStatus.Pending
     })
-    status: string
+    status: OrderStatus
 
     @Column("decimal", { precision: 10, scale: 2 })
     totalAmount: number
